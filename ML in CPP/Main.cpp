@@ -4,6 +4,6 @@
 int main()
 {
 	DataHandler dh;
-	dh.readInputData("../train-images-idx3-ubyte");
+	dh.readInputData("../train_images");
 	dh.readLabelData("../train_labels");
 }
