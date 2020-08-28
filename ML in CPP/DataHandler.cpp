@@ -1,19 +1,8 @@
-#define _CRT_SECURE_NO_DEPRECATE
 #include "DataHandler.h"
 #include <algorithm>
-#include <random>
-#include <iostream>
+#include <map>
+#include <fstream>
 
-
-DataHandler::DataHandler()
-{
-}
-
-DataHandler::~DataHandler()
-{
-    // FIX ME
-}
-//
 //void DataHandler::readCsv(std::string path, std::string delimiter)
 //{
 //    class_counts = 0;
@@ -53,65 +42,41 @@ DataHandler::~DataHandler()
 //    featureVectorSize = dataArray->at(0)->getNormalizedFeatureVector()->size();
 //}
 
-void DataHandler::readInputData(std::string path)
+DataHandler::DataHandler(const char* train_images_path, const char* train_labels_path)
 {
-    uint32_t magic = 0;
-    uint32_t nImages = 0;
-    uint32_t rows = 0;
-    uint32_t cols = 0;
+    readInputData(train_images_path);
+    readLabelData(train_labels_path);
+    splitData();
+    countLabels();
+}
 
-    uint32_t headers[4];
-    char bytes[4];
-    FILE* f = fopen(path.c_str(), "rb");
-    if (f)
+void DataHandler::readInputData(const char* path)
+{
+    uint32_t headers[4]; //Magic Num | nImages | Rows | Cols
+    unsigned char bytes[4];
+    std::ifstream file;
+    file.open(path, std::ios::binary | std::ios::in);
+    if (file)
     {
         uint32_t i = 0;
         while (i < 4)//4 headers
         {
-            if (fread(bytes, sizeof(bytes), 1, f))
-            {
-                /*switch (i)
-                {
-                case 0:
-                    magic = format(bytes);
-                    break;
-                case 1:
-                    nImages = format(bytes);
-                    break;
-                case 2:
-                    rows = format(bytes);
-                    break;
-                case 3:
-                    cols = format(bytes);
-                    break;
-                }*/
-                headers[i] = format(bytes);
-                ++i;
-            }
+            file.read((char *) bytes, sizeof(bytes));
+            headers[i++] = format(bytes);
         }
         printf("Done getting images file header.\n");
-        printf("magic: 0x%08x\n", headers[0]);
-
-        printf("nImages: 0x%08x\n", headers[1]);
-
-        printf("rows: 0x%08x\n", headers[2]);
-
-        printf("cols: 0x%08x\n", headers[3]);
-        exit(1);
-        uint32_t image_size = rows * cols;
-        for (i = 0; i < nImages; i++)
+        
+        uint32_t image_size = headers[2] * headers[3];
+        printf("%u\n", headers[1]);
+        for (i = 0; i < headers[1]; i++)
         {
-            if (i%10000 == 0)std::cout << i << "\n";
+            if (i%10000 == 0) printf("%d images read.\n", i);
             Data d;
-            d.setFeatureVector(std::vector<uint8_t>());
             uint8_t element[1];
-            for (int j = 0; j < image_size; j++)
+            for (uint32_t j = 0; j < image_size; j++)
             {
-                //std::cout << "\t" << j << "\n";
-                if (fread(element, sizeof(element), 1, f))
-                {
-                    d.appendToFeatureVector(*element);
-                }
+                file.read((char*)element, sizeof(element));
+                d.appendToFeatureVector(*element);
             }
             dataArray.push_back(d);
         }
@@ -124,49 +89,39 @@ void DataHandler::readInputData(std::string path)
         exit(1);
     }
 }
-void DataHandler::readLabelData(std::string path)
+
+void DataHandler::readLabelData(const char* path)
 {
-    uint32_t magic = 0;
-    uint32_t nLabels = 0;
-    char bytes[4];
-    FILE* f = fopen(path.c_str(), "rb");
-    if (f)
+    uint32_t headers[4];
+    unsigned char bytes[4];
+    std::ifstream file;
+    file.open(path, std::ios::binary | std::ios::in);
+    if (file)
     {
-        int i = 0;
+        uint32_t i = 0;
         while (i < 2)//2 Headers
         {
-            if (fread(bytes, sizeof(bytes), 1, f))
-            {
-                switch (i)
-                {
-                case 0:
-                    magic = format(bytes);
-                    break;
-                case 1:
-                    nLabels = format(bytes);
-                    break;
-                }
-                ++i;
-            }
+            file.read((char*)bytes, sizeof(bytes));
+            headers[i++] = format(bytes);
         }
 
-        for (i = 0; i < nLabels; i++)
+        printf("\nDone getting labels file header.\n");
+        for (i = 0; i < headers[1]; i++)
         {
             uint8_t element[1];
-            if (fread(element, sizeof(element), 1, f))
-                dataArray[i].setLabel(*element);
+            file.read((char*)element, sizeof(element));
+            dataArray[i].setLabel(*element);
         }
-        printf("Done getting labels file header.\n");
     }
     else
     {
-        printf("Invalid Label File Path\n");
+        printf("Invalid Label File Path.\n");
         exit(1);
     }
 }
+
 void DataHandler::splitData()
 {
-    std::unordered_set<int> used_indexes;
     int train_size = dataArray.size() * TRAIN_SET_PERCENT;
     int test_size = dataArray.size() * TEST_SET_PERCENT;
     int valid_size = dataArray.size() * VALID_SET_PERCENT;
@@ -176,105 +131,59 @@ void DataHandler::splitData()
     // Training Data
     while (train_size--)
         trainingData.push_back(dataArray[index++]);
-
     // Test Data
     while (test_size--)
         testData.push_back(dataArray[index++]);
-
     // Test Data
     while (valid_size--)
         validationData.push_back(dataArray[index++]);
 
     printf("Training Data Size: %lu.\n", trainingData.size());
     printf("Test Data Size: %lu.\n", testData.size());
-    printf("Validation Data Size: %lu.\n", validationData.size());
+    printf("Validation Data Size: %lu.\n\n", validationData.size());
 }
-//
-//void DataHandler::countClasses()
-//{
-//    int count = 0;
-//    for (unsigned i = 0; i < dataArray->size(); i++)
-//    {
-//        if (classFromInt.find(dataArray->at(i)->getLabel()) == classFromInt.end())
-//        {
-//            classFromInt[dataArray->at(i)->getLabel()] = count;
-//            dataArray->at(i)->setEnumeratedLabel(count);
-//            count++;
-//        }
-//        else
-//        {
-//            dataArray->at(i)->setEnumeratedLabel(classFromInt[dataArray->at(i)->getLabel()]);
-//        }
-//    }
-//
-//    class_counts = count;
-//    for (Data* data : *dataArray)
-//        data->setClassVector(class_counts);
-//    printf("Successfully Extraced %d Unique Classes.\n", class_counts);
-//}
 
-//void DataHandler::normalize()
-//{
-//    std::vector<double> mins, maxs;
-//    // fill min and max lists
-//
-//    Data* d = dataArray->at(0);
-//    for (auto val : *d->getFeatureVector())
-//    {
-//        mins.push_back(val);
-//        maxs.push_back(val);
-//    }
-//
-//    for (int i = 1; i < dataArray->size(); i++)
-//    {
-//        d = dataArray->at(i);
-//        for (int j = 0; j < d->getFeatureVectorSize(); j++)
-//        {
-//            double value = (double)d->getFeatureVector()->at(j);
-//            if (value < mins.at(j)) mins[j] = value;
-//            if (value > maxs.at(j)) maxs[j] = value;
-//        }
-//    }
-//    // normalize data array
-//
-//    for (int i = 0; i < dataArray->size(); i++)
-//    {
-//        dataArray->at(i)->setNormalizedFeatureVector(new std::vector<double>());
-//        dataArray->at(i)->setClassVector(class_counts);
-//        for (int j = 0; j < dataArray->at(i)->getFeatureVectorSize(); j++)
-//        {
-//            if (maxs[j] - mins[j] == 0) dataArray->at(i)->appendToFeatureVector(0.0);
-//            else
-//                dataArray->at(i)->appendToFeatureVector(
-//                    (double)(dataArray->at(i)->getFeatureVector()->at(j) - mins[j]) / (maxs[j] - mins[j]));
-//        }
-//    }
-//}
-//
-//int DataHandler::getClassCounts()
-//{
-//    return class_counts;
-//}
+void DataHandler::countLabels()
+{
+    for (size_t i = 0; i < dataArray.size(); i++)
+    {
+        if (fLabel.find(dataArray[i].getLabel()) == fLabel.end())
+        {
+            fLabel[dataArray[i].getLabel()] = 1;
+        }
+        else
+        {
+            fLabel[dataArray[i].getLabel()]++;
+        }
+    }
+
+    printf("Successfully Extraced %d Unique Labels:\n", fLabel.size());
+    for (auto i = fLabel.begin(); i != fLabel.end(); i++)
+        printf("%u -> %u\n", i->first, i->second);
+}
 
 int DataHandler::getDataArraySize() const
 {
     return dataArray.size();
 }
+
 int DataHandler::getTrainingDataSize() const
 {
     return trainingData.size();
 }
+
 int DataHandler::getTestDataSize() const
 {
     return testData.size();
 }
+
 int DataHandler::getValidationSize() const
 {
     return validationData.size();
 }
 
 //converts high endian to little indian (required for Intel Processors)
-uint32_t DataHandler::format(const char (&bytes)[4]) const
+uint32_t DataHandler::format(const unsigned char (&bytes)[4]) const
 {
     return (uint32_t)((bytes[0] << 24) |
         (bytes[1] << 16) |
@@ -286,19 +195,21 @@ const std::vector<Data>& DataHandler::getTrainingData() const
 {
     return trainingData;
 }
+
 const std::vector<Data>& DataHandler::getTestData() const
 {
     return testData;
 }
+
 const std::vector<Data>& DataHandler::getValidationData() const
 {
     return validationData;
 }
 
-//std::map<uint8_t, int> DataHandler::getClassMap()
-//{
-//    return classFromInt;
-//}
+const std::map<uint8_t, int>& DataHandler::getFLabel() const
+{
+    return fLabel;
+}
 
 //void DataHandler::print()
 //{
