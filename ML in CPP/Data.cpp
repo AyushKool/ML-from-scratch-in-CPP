@@ -11,7 +11,7 @@ void Data::appendToFeatureVector(uint8_t val)
     normalizedFeatureVector.emplace_back(val / 255.0f);
 }
 
-int Data::getFeatureVectorSize() const
+size_t Data::getFeatureVectorSize() const
 {
     return featureVector.size();
 }

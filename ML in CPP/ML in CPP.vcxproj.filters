@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\KNN">
+      <UniqueIdentifier>{761e259f-7f02-444a-bf31-0b9c2aeae892}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Data.h">
@@ -20,6 +23,9 @@
     </ClInclude>
     <ClInclude Include="DataHandler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KNN.h">
+      <Filter>Header Files\KNN</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +37,9 @@
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="KNN.cpp">
+      <Filter>Header Files\KNN</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

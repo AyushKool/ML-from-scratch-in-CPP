@@ -145,10 +145,12 @@
   <ItemGroup>
     <ClInclude Include="Data.h" />
     <ClInclude Include="DataHandler.h" />
+    <ClInclude Include="KNN.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data.cpp" />
     <ClCompile Include="DataHandler.cpp" />
+    <ClCompile Include="KNN.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

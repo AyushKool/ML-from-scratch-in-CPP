@@ -3,44 +3,11 @@
 #include <map>
 #include <fstream>
 
-//void DataHandler::readCsv(std::string path, std::string delimiter)
-//{
-//    class_counts = 0;
-//    std::ifstream data_file;
-//    data_file.open(path.c_str());
-//    std::string line;
-//
-//    while (std::getline(data_file, line))
-//    {
-//        if (line.length() == 0) continue;
-//        Data* d = new Data();
-//        d->setNormalizedFeatureVector(new std::vector<double>());
-//        size_t position = 0;
-//        std::string token;
-//        while ((position = line.find(delimiter)) != std::string::npos)
-//        {
-//            token = line.substr(0, position);
-//            d->appendToFeatureVector(std::stod(token));
-//            line.erase(0, position + delimiter.length());
-//        }
-//
-//        if (classFromString.find(line) != classFromString.end())
-//        {
-//            d->setLabel(classFromString[line]);
-//        }
-//        else
-//        {
-//            classFromString[line] = class_counts;
-//            d->setLabel(classFromString[token]);
-//            class_counts++;
-//        }
-//        dataArray->push_back(d);
-//    }
-//    for (Data* data : *dataArray)
-//        data->setClassVector(class_counts);;
-//    //normalize();
-//    featureVectorSize = dataArray->at(0)->getNormalizedFeatureVector()->size();
-//}
+std::vector<Data> DataHandler::dataArray; // all of the data
+std::vector<Data> DataHandler::trainingData;
+std::vector<Data> DataHandler::testData;
+std::vector<Data> DataHandler::validationData;
+std::map<uint8_t, int> DataHandler::fLabel;
 
 DataHandler::DataHandler(const char* train_images_path, const char* train_labels_path)
 {
@@ -158,32 +125,12 @@ void DataHandler::countLabels()
     }
 
     printf("Successfully Extraced %d Unique Labels:\n", fLabel.size());
-    for (auto i = fLabel.begin(); i != fLabel.end(); i++)
-        printf("%u -> %u\n", i->first, i->second);
-}
-
-int DataHandler::getDataArraySize() const
-{
-    return dataArray.size();
-}
-
-int DataHandler::getTrainingDataSize() const
-{
-    return trainingData.size();
-}
-
-int DataHandler::getTestDataSize() const
-{
-    return testData.size();
-}
-
-int DataHandler::getValidationSize() const
-{
-    return validationData.size();
+    //for (auto i = fLabel.begin(); i != fLabel.end(); i++)
+    //    printf("%u : %u\n", i->first, i->second);
 }
 
 //converts high endian to little indian (required for Intel Processors)
-uint32_t DataHandler::format(const unsigned char (&bytes)[4]) const
+uint32_t DataHandler::format(const unsigned char(&bytes)[4]) const
 {
     return (uint32_t)((bytes[0] << 24) |
         (bytes[1] << 16) |
@@ -191,22 +138,42 @@ uint32_t DataHandler::format(const unsigned char (&bytes)[4]) const
         (bytes[3]));
 }
 
-const std::vector<Data>& DataHandler::getTrainingData() const
+size_t DataHandler::getDataArraySize()
+{
+    return dataArray.size();
+}
+
+size_t DataHandler::getTrainingDataSize()
+{
+    return trainingData.size();
+}
+
+size_t DataHandler::getTestDataSize()
+{
+    return testData.size();
+}
+
+size_t DataHandler::getValidationDataSize()
+{
+    return validationData.size();
+}
+
+const std::vector<Data>& DataHandler::getTrainingData()
 {
     return trainingData;
 }
 
-const std::vector<Data>& DataHandler::getTestData() const
+const std::vector<Data>& DataHandler::getTestData()
 {
     return testData;
 }
 
-const std::vector<Data>& DataHandler::getValidationData() const
+const std::vector<Data>& DataHandler::getValidationData()
 {
     return validationData;
 }
 
-const std::map<uint8_t, int>& DataHandler::getFLabel() const
+const std::map<uint8_t, int>& DataHandler::getFLabel()
 {
     return fLabel;
 }

@@ -11,7 +11,7 @@ public:
 	void setLabel(const uint8_t&);
 	void appendToFeatureVector(uint8_t val);
 
-	int getFeatureVectorSize() const;
+	size_t getFeatureVectorSize() const;
 	const uint8_t& getLabel() const;
 	const std::vector<uint8_t>& getFeatureVector() const;
 	const std::vector<float>& getNormalizedFeatureVector() const;

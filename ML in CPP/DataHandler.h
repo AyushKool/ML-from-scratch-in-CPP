@@ -6,12 +6,12 @@
 class DataHandler
 {
 private:
-	std::vector<Data> dataArray; // all of the data
-	std::vector<Data> trainingData;
-	std::vector<Data> testData;
-	std::vector<Data> validationData;
-	std::map<uint8_t, int> fLabel; // k:label v:frequency of label
-
+	static std::vector<Data> dataArray; // all of the data
+	static std::vector<Data> trainingData;
+	static std::vector<Data> testData;
+	static std::vector<Data> validationData;
+	static std::map<uint8_t, int> fLabel; // k:label v:frequency of label
+	
 	void readInputData(const char* path);
 	void readLabelData(const char* path);
 	void splitData();
@@ -25,13 +25,14 @@ public:
 	DataHandler(const char* train_images_path, const char* train_labels_path);
 
 	//void readCsv(std::string, std::string);
-	int getDataArraySize() const;
-	int getTrainingDataSize() const;
-	int getTestDataSize() const;
-	int getValidationSize() const;
+	
 	uint32_t format(const unsigned char(&bytes)[4]) const;
-	const std::vector<Data>& getTrainingData() const;
-	const std::vector<Data>& getTestData() const;
-	const std::vector<Data>& getValidationData() const;
-	const std::map<uint8_t, int>& getFLabel() const;
+	static size_t getDataArraySize();
+	static size_t getTrainingDataSize();
+	static size_t getTestDataSize();
+	static size_t getValidationDataSize();
+	static const std::vector<Data>& getTrainingData();
+	static const std::vector<Data>& getTestData();
+	static const std::vector<Data>& getValidationData();
+	static const std::map<uint8_t, int>& getFLabel();
 };
